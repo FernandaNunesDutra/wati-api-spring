@@ -56,8 +56,8 @@ public class TipDAO {
         ParameterExpression<Date> parameter = criteriaBuilder.parameter(Date.class);
 
 
-        Predicate dateCreationPredicate = criteriaBuilder.greaterThanOrEqualTo(root.get("dateCreated"), parameter);
-        Predicate dateCreationOrPredicate = criteriaBuilder.or(dateCreationPredicate, root.<Date>get("dateCreated").isNull());
+        Predicate dateCreationPredicate = criteriaBuilder.greaterThanOrEqualTo(root.get("dateCreation"), parameter);
+        Predicate dateCreationOrPredicate = criteriaBuilder.or(dateCreationPredicate, root.<Date>get("dateCreation").isNull());
 
         criteriaQuery.where(dateCreationOrPredicate);
 

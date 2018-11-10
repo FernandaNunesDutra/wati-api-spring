@@ -16,9 +16,8 @@ import ufjf.wati.model.User;
 import ufjf.wati.response.UserResponse;
 import ufjf.wati.service.Authentication;
 
-import javax.ws.rs.HeaderParam;
+import javax.transaction.Transactional;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
  * @author fernanda
@@ -35,7 +34,8 @@ public class UserFacadeREST {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody String login) {
+    @Transactional
+    public ResponseEntity login(@RequestBody String login) {
         JsonParser parser = new JsonParser();
         JsonObject o = parser.parse(login).getAsJsonObject();
         String password = o.get("password").getAsString();
@@ -53,24 +53,17 @@ public class UserFacadeREST {
     }
 
     @GetMapping("/logout")
-    public Response logout(@HeaderParam("token") String token) {
+    @Transactional
+    public ResponseEntity logout(@RequestHeader("token") String token) {
+        boolean validate = userDao.validate(token);
 
-        try {
+        if (validate) {
 
-            boolean validate = userDao.validate(token);
+            userDao.logout(token);
 
-            if (validate) {
-
-                userDao.logout(token);
-
-                return Response.ok().build();
-
-            } else {
-                return Response.status(Response.Status.FORBIDDEN).entity("Ação não permitida para esse usuário.").build();
-            }
-
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+            return ResponseEntity.ok().build();
+        } else {
+            return new ResponseEntity("Usuário inválido.", HttpStatus.UNAUTHORIZED);
         }
     }
 }

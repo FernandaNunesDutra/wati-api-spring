@@ -1,18 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ufjf.wati.facade;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import ufjf.wati.dao.CigaretteDAO;
 import ufjf.wati.dao.UserDAO;
 import ufjf.wati.model.Cigarette;
@@ -21,19 +14,18 @@ import ufjf.wati.model.User;
 import ufjf.wati.response.RankingResponse;
 import ufjf.wati.response.TotalCigaretteResponse;
 
-import javax.ws.rs.HeaderParam;
+import javax.transaction.Transactional;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
 /**
- *
  * @author fernanda
  */
 @RestController
-@RequestMapping(value = "/cigarette", consumes = { MediaType.APPLICATION_JSON })
+@RequestMapping(value = "/cigarette", consumes = {MediaType.APPLICATION_JSON})
 public class CigaretteFacadeREST {
 
     private UserDAO userDao;
@@ -47,135 +39,96 @@ public class CigaretteFacadeREST {
     }
 
     @PostMapping("/today")
-    public Response postToday(@HeaderParam("token") String token, String cigarette) {
+    @Transactional
+    public ResponseEntity postToday(@RequestHeader("token") String token, @RequestBody String cigarette) throws ParseException {
 
-        
-        try{
-            
-            boolean validate = userDao.validate(token);
+        boolean validate = userDao.validate(token);
 
-            if(validate){
-                JsonParser parser = new JsonParser();
-                SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-                
-                JsonObject o = parser.parse(cigarette).getAsJsonObject();
-                
-                double packCigarettesPrice =  o.get("pack_cigarettes_price").getAsDouble();
-                String dateString = o.get("date_creation").getAsString();
-                Date date = formatter.parse(dateString);
-                int numCigarette = o.get("num_cigarette").getAsInt();
-                double economized =  o.get("economized").getAsDouble();
-                double spent =  o.get("spent").getAsDouble();
-                int userId = o.get("id_user").getAsInt();
+        if (validate) {
+            JsonParser parser = new JsonParser();
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
 
-                cigaretteDao.alter(new Cigarette(packCigarettesPrice, economized, spent, numCigarette, date, userId));
-                
-                Gson gson = new Gson();
-                String json = gson.toJson(cigaretteDao.getToday(userId));
-                return Response.ok(json, MediaType.APPLICATION_JSON).build();  
-            
-            }else{
-                return Response.status(Response.Status.FORBIDDEN).entity("Ação não permitida para esse usuário.").build();  
-            }                  
+            JsonObject o = parser.parse(cigarette).getAsJsonObject();
 
-        }catch(Exception e){
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();  
+            double packCigarettesPrice = o.get("pack_cigarettes_price").getAsDouble();
+            String dateString = o.get("date_creation").getAsString();
+            Date date = formatter.parse(dateString);
+            int numCigarette = o.get("num_cigarette").getAsInt();
+            double economized = o.get("economized").getAsDouble();
+            double spent = o.get("spent").getAsDouble();
+            Long userId = o.get("id_user").getAsLong();
+
+            cigaretteDao.alter(new Cigarette(packCigarettesPrice, economized, spent, numCigarette, date, userId));
+
+            return ResponseEntity.ok(cigaretteDao.getToday(userId));
+
+        } else {
+            return new ResponseEntity("Ação não permitida para esse usuário.", HttpStatus.FORBIDDEN);
         }
     }
 
     @GetMapping("/today")
-    public Response getToday(@HeaderParam("token") String token) {
+    public ResponseEntity getToday(@RequestHeader("token") String token) {
         Cigarette today = null;
-        
+
         boolean validate = userDao.validate(token);
 
-        if(validate){
-            
+        if (validate) {
+
             User user = userDao.findByToken(token);
-            today = cigaretteDao.getToday((int)user.getId());
+            today = cigaretteDao.getToday(user.getId());
         }
-        
+
         return cigarette(token, today);
     }
 
     @GetMapping("/total")
-    public Response total(@HeaderParam("token") String token) {
+    public ResponseEntity total(@RequestHeader("token") String token) {
+        boolean validate = userDao.validate(token);
 
-        
-        try{
-            
-            boolean validate = userDao.validate(token);
+        if (validate) {
 
-            if(validate){
-                
-                User user = userDao.findByToken(token);
-                
-                double spent = cigaretteDao.getTotalSpent(user.getId());
-                long smokedTotal = cigaretteDao.getSmokedTotal(user.getId());
-                long average = cigaretteDao.getAverage(user.getId());
-                double economized = cigaretteDao.getTotalEconomized(user.getId());
-                
-                TotalCigaretteResponse total = new TotalCigaretteResponse(economized, spent, smokedTotal, average);
-                
-                Gson gson = new Gson();
-                String json = gson.toJson(total);
-                return Response.ok(json, MediaType.APPLICATION_JSON).build();  
-            
-            }else{
-                return Response.status(Response.Status.FORBIDDEN).entity("Ação não permitida para esse usuário.").build();  
-            }                  
+            User user = userDao.findByToken(token);
 
-        }catch(Exception e){
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();  
+            double spent = cigaretteDao.getTotalSpent(user.getId());
+            long smokedTotal = cigaretteDao.getSmokedTotal(user.getId());
+            long average = cigaretteDao.getAverage(user.getId());
+            double economized = cigaretteDao.getTotalEconomized(user.getId());
+
+            TotalCigaretteResponse total = new TotalCigaretteResponse(economized, spent, smokedTotal, average);
+
+            return ResponseEntity.ok(total);
+
+        } else {
+            return new ResponseEntity("Ação não permitida para esse usuário.", HttpStatus.FORBIDDEN);
         }
     }
 
     @GetMapping("/ranking")
-    public Response ranking(@HeaderParam("token") String token) {
+    public ResponseEntity ranking(@RequestHeader("token") String token) {
+        boolean validate = userDao.validate(token);
 
-        
-        try{
-            
-            boolean validate = userDao.validate(token);
+        if (validate) {
 
-            if(validate){
 
-                
-                User user = userDao.findByToken(token);
-                List<CigarettesAverage> userCigarettes = cigaretteDao.getOneMonthAgoSmoked(user.getId());
-                List<CigarettesAverage> averageCigarettes = cigaretteDao.getOneMonthAgoAverageSmoked();
-                
-                Gson gson = new Gson();
-                String json = gson.toJson(new RankingResponse(userCigarettes, averageCigarettes));
-                return Response.ok(json, MediaType.APPLICATION_JSON).build(); 
-            
-            }else{
-                return Response.status(Response.Status.FORBIDDEN).entity("Ação não permitida para esse usuário.").build();  
-            }                  
+            User user = userDao.findByToken(token);
+            List<CigarettesAverage> userCigarettes = cigaretteDao.getOneMonthAgoSmoked(user.getId());
+            List<CigarettesAverage> averageCigarettes = cigaretteDao.getOneMonthAgoAverageSmoked();
 
-        }catch(Exception e){
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();  
+            return ResponseEntity.ok(new RankingResponse(userCigarettes, averageCigarettes));
+
+        } else {
+            return new ResponseEntity("Ação não permitida para esse usuário.", HttpStatus.FORBIDDEN);
         }
     }
-    
-    private Response cigarette(String token, Cigarette cigarette){
-        
-        try{
-            
-            boolean validate = userDao.validate(token);
 
-            if(validate){
-                
-                Gson gson = new Gson();
-                String json = gson.toJson(cigarette);
-                return Response.ok(json, MediaType.APPLICATION_JSON).build();  
-            
-            }else{
-                return Response.status(Response.Status.FORBIDDEN).entity("Ação não permitida para esse usuário.").build();  
-            }                  
+    private ResponseEntity cigarette(String token, Cigarette cigarette) {
+        boolean validate = userDao.validate(token);
 
-        }catch(Exception e){
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();  
+        if (validate) {
+            return ResponseEntity.ok(cigarette);
+        } else {
+            return new ResponseEntity("Ação não permitida para esse usuário.", HttpStatus.FORBIDDEN);
         }
     }
 }

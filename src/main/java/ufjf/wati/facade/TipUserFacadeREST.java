@@ -5,23 +5,20 @@
  */
 package ufjf.wati.facade;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import ufjf.wati.dao.TipUserDAO;
 import ufjf.wati.dao.UserDAO;
 import ufjf.wati.response.TipUserResponse;
 
-import javax.ws.rs.HeaderParam;
+import javax.transaction.Transactional;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
- *
  * @author fernanda
  */
 @RestController
@@ -38,33 +35,24 @@ public class TipUserFacadeREST {
         this.tipUserDao = tipUserDao;
     }
 
-    @PostMapping(value = "/like", consumes = { MediaType.APPLICATION_JSON })
-    public Response like(@HeaderParam("token") String token, String tip) {
-        try{
-            
-            boolean validate = userDao.validate(token);
+    @PostMapping(value = "/like", consumes = {MediaType.APPLICATION_JSON})
+    @Transactional
+    public ResponseEntity like(@RequestHeader("token") String token, @RequestBody String tip) {
+        boolean validate = userDao.validate(token);
 
-            if(validate){
-                JsonParser parser = new JsonParser();                
-                JsonObject o = parser.parse(tip).getAsJsonObject();
-                
-                int tipId =  o.get("id_tip").getAsInt();
-                long userId =  o.get("id_user").getAsLong();
-                boolean like =  o.get("like").getAsBoolean();
+        if (validate) {
+            JsonParser parser = new JsonParser();
+            JsonObject o = parser.parse(tip).getAsJsonObject();
 
-                tipUserDao.alter(tipId, userId, like);
-                
-                Gson gson = new Gson();
-                String json = gson.toJson(new TipUserResponse(tipId, userId));
-                
-                return Response.ok(json, MediaType.APPLICATION_JSON).build();   
-            
-            }else{
-                return Response.status(Response.Status.FORBIDDEN).entity("Ação não permitida para esse usuário.").build();  
-            }                  
+            int tipId = o.get("id_tip").getAsInt();
+            long userId = o.get("id_user").getAsLong();
+            boolean like = o.get("like").getAsBoolean();
 
-        }catch(Exception e){
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();  
+            tipUserDao.alter(tipId, userId, like);
+            return ResponseEntity.ok(new TipUserResponse(tipId, userId));
+
+        } else {
+            return new ResponseEntity("Ação não permitida para esse usuário.", HttpStatus.FORBIDDEN);
         }
     }
 }

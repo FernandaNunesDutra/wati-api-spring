@@ -43,13 +43,13 @@ public class UserDAO {
 
         try {
 
-            Query query = em.createQuery("UPDATE User u SET u.token = :token WHERE u.id = :id", User.class);
+            Query query = em.createQuery("UPDATE User u SET u.token = :token WHERE u.id = :id");
             query.setParameter("token", token);
             query.setParameter("id", id);
             query.executeUpdate();
 
         } catch (Exception e) {
-            System.out.print("Erro ao deslogar usuário.");
+            System.out.print("Erro ao atualizar o token.");
         }
     }
 
@@ -73,7 +73,7 @@ public class UserDAO {
 
         try {
 
-            Query query = em.createQuery("UPDATE User u SET u.token = NULL WHERE u.token = :token", User.class);
+            Query query = em.createQuery("UPDATE User u SET u.token = NULL WHERE u.token = :token");
             query.setParameter("token", token);
             query.executeUpdate();
 
@@ -90,11 +90,11 @@ public class UserDAO {
 
         User user = null;
 
-        Query query = em.createQuery("Select u FROM User u WHERE u.token = :token", User.class);
+        TypedQuery<User> query = em.createQuery("Select u FROM User u WHERE u.token = :token", User.class);
         query.setParameter("token", token);
 
         try {
-            user = (User) query.getSingleResult();
+            user = query.getSingleResult();
         } catch (Exception e) {
             System.out.print("Erro ao buscar usuário pelo token no banco.");
         }

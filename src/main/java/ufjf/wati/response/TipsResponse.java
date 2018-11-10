@@ -20,5 +20,8 @@ public class TipsResponse {
     public TipsResponse(List<Tip> tips) {
         this.tips = tips;
     }
-    
+
+    public List<Tip> getTips() {
+        return tips;
+    }
 }

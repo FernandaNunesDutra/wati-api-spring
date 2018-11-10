@@ -12,12 +12,13 @@ public class Cigarette {
     private Double spent;
     private Integer numCigarette;
     private Date dateCreation;
-    private int userId;
+    private Long userId;
 
 
     public Cigarette(){}
 
-    public Cigarette(double packCigarettesPrice, double economized, double spent, Integer numCigarette, Date dateCreation, int userId) {
+    public Cigarette(Double packCigarettesPrice, Double economized, Double spent, Integer numCigarette,
+                     Date dateCreation, Long userId) {
         this.packCigarettesPrice = packCigarettesPrice;
         this.numCigarette = numCigarette;
         this.dateCreation = dateCreation;
@@ -39,11 +40,11 @@ public class Cigarette {
 
     @Basic
     @Column(name = "id_user")
-    public int getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
@@ -113,7 +114,7 @@ public class Cigarette {
         String output;
 
         output = number.replace(".", "");
-        output = number.replace(',', '.');
+        output = output.replace(',', '.');
 
         return output;
     }

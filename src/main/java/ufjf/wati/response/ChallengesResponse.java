@@ -21,5 +21,8 @@ public class ChallengesResponse {
     public ChallengesResponse(List<Challenge> challenges) {
         this.challenges = challenges;
     }
-    
+
+    public List<Challenge> getChallenges() {
+        return challenges;
+    }
 }

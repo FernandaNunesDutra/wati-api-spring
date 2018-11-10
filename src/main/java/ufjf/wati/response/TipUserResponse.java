@@ -21,6 +21,12 @@ public class TipUserResponse {
         this.tipId = tipId;
         this.userId = userId;
     }
-    
-    
+
+    public long getTipId() {
+        return tipId;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
 }
