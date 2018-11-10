@@ -1,19 +1,16 @@
-package ufjf.wati.response;
+package ufjf.wati.dto;
 
-import com.google.gson.annotations.SerializedName;
+public class UserDto {
 
-public class UserResponse {
-
-    @SerializedName("id")
     private long id;
-    @SerializedName("email")
+
     private String email;
-    @SerializedName("name")
+
     private String name;
-    @SerializedName("token")
+
     private String token;
 
-    public UserResponse(long id, String email, String name, String token) {
+    public UserDto(long id, String email, String name, String token) {
         this.id = id;
         this.email = email;
         this.name = name;

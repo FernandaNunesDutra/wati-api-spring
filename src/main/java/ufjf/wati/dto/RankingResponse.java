@@ -1,4 +1,4 @@
-package ufjf.wati.response;
+package ufjf.wati.dto;
 
 import ufjf.wati.model.CigarettesAverage;
 import com.google.gson.annotations.SerializedName;

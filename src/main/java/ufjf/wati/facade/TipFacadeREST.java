@@ -6,7 +6,6 @@
 package ufjf.wati.facade;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -14,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ufjf.wati.dao.TipDAO;
 import ufjf.wati.dao.UserDAO;
+import ufjf.wati.dto.TipsResponse;
 import ufjf.wati.model.Tip;
-import ufjf.wati.response.TipsResponse;
 
 import javax.ws.rs.QueryParam;
 import java.text.SimpleDateFormat;
@@ -41,25 +40,19 @@ public class TipFacadeREST {
 
     @GetMapping("/all")
     public ResponseEntity all(@RequestHeader("token") String token, @QueryParam("date") String date) {
-        boolean validate = userDao.validate(token);
+        userDao.validateUserToken(token);
 
-        if (validate) {
+        List<Tip> tips;
+        Date creationDate = parseDate(date);
 
-            List<Tip> tips;
-            Date creationDate = parseDate(date);
-
-            if (creationDate == null) {
-                tips = tipDao.getAll();
-            } else {
-                tips = tipDao.getByDate(creationDate);
-            }
-
-            TipsResponse response = new TipsResponse(tips);
-            return ResponseEntity.ok(response);
-
+        if (creationDate == null) {
+            tips = tipDao.getAll();
         } else {
-            return new ResponseEntity("Ação não permitida para esse usuário.", HttpStatus.FORBIDDEN);
+            tips = tipDao.getByDate(creationDate);
         }
+
+        TipsResponse response = new TipsResponse(tips);
+        return ResponseEntity.ok(response);
     }
 
     private Date parseDate(String date) {

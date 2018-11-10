@@ -1,7 +1,6 @@
 package ufjf.wati.facade;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -9,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ufjf.wati.dao.ChallengeDAO;
 import ufjf.wati.dao.UserDAO;
+import ufjf.wati.dto.ChallengesResponse;
 import ufjf.wati.model.Challenge;
-import ufjf.wati.response.ChallengesResponse;
 
 import javax.ws.rs.QueryParam;
 import java.text.SimpleDateFormat;
@@ -41,24 +40,19 @@ public class ChallengeFacadeREST {
 
     @GetMapping("/all")
     public ResponseEntity all(@RequestHeader("token") String token, @QueryParam("date") String date) {
-        boolean validate = userDao.validate(token);
+        userDao.validateUserToken(token);
 
-        if (validate) {
-            List<Challenge> challenges;
-            Date creationDate = parseDate(date);
+        List<Challenge> challenges;
+        Date creationDate = parseDate(date);
 
-            if (creationDate == null) {
-                challenges = challengeDao.getAll();
-            } else {
-                challenges = challengeDao.getByDate(creationDate);
-            }
-
-            ChallengesResponse response = new ChallengesResponse(challenges);
-            return ResponseEntity.ok(response);
-
+        if (creationDate == null) {
+            challenges = challengeDao.getAll();
         } else {
-            return new ResponseEntity("Ação não permitida para esse usuário.", HttpStatus.FORBIDDEN);
+            challenges = challengeDao.getByDate(creationDate);
         }
+
+        ChallengesResponse response = new ChallengesResponse(challenges);
+        return ResponseEntity.ok(response);
     }
 
     private Date parseDate(String date) {
