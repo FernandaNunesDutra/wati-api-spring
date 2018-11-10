@@ -6,16 +6,31 @@ import java.util.Date;
 @Entity
 @Table(name = "tb_cigarette", schema = "wati")
 public class Cigarette {
+    @Id
+    @Column(name = "id")
     private int id;
+
+    @Column(name = "pack_cigarettes_price")
     private Double packCigarettesPrice;
+
+    @Column(name = "economized")
     private Double economized;
+
+    @Column(name = "spent")
     private Double spent;
+
+    @Column(name = "num_cigarette")
     private Integer numCigarette;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "date_creation")
     private Date dateCreation;
+
+    @Column(name = "id_user")
     private Long userId;
 
-
-    public Cigarette(){}
+    public Cigarette() {
+    }
 
     public Cigarette(Double packCigarettesPrice, Double economized, Double spent, Integer numCigarette,
                      Date dateCreation, Long userId) {
@@ -27,75 +42,32 @@ public class Cigarette {
         this.userId = userId;
     }
 
-
-    @Id
-    @Column(name = "id")
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    @Basic
-    @Column(name = "id_user")
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    @Basic
-    @Column(name = "pack_cigarettes_price")
     public Double getPackCigarettesPrice() {
         return packCigarettesPrice;
     }
 
-    public void setPackCigarettesPrice(Double packCigarettesPrice) {
-        this.packCigarettesPrice = packCigarettesPrice;
-    }
-
-    @Basic
-    @Column(name = "economized")
     public Double getEconomized() {
         return economized;
     }
 
-    public void setEconomized(Double economized) {
-        this.economized = economized;
-    }
-
-    @Basic
-    @Column(name = "spent")
     public Double getSpent() {
         return spent;
     }
 
-    public void setSpent(Double spent) {
-        this.spent = spent;
-    }
-
-    @Basic
-    @Column(name = "num_cigarette")
     public Integer getNumCigarette() {
         return numCigarette;
     }
 
-    public void setNumCigarette(Integer numCigarette) {
-        this.numCigarette = numCigarette;
-    }
-
-    @Basic
-    @Column(name = "date_creation")
     public Date getDateCreation() {
         return dateCreation;
     }
 
-    public void setDateCreation(Date dateCreation) {
-        this.dateCreation = dateCreation;
+    public Long getUserId() {
+        return userId;
     }
 
     public String formatEconomized() {
@@ -110,7 +82,7 @@ public class Cigarette {
         return format(String.valueOf(packCigarettesPrice));
     }
 
-    private String format(String number){
+    private String format(String number) {
         String output;
 
         output = number.replace(".", "");

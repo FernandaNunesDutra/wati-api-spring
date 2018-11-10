@@ -1,32 +1,26 @@
 package ufjf.wati.model;
 
 import javax.persistence.Column;
-import javax.persistence.Id;
+import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 
+@Embeddable
 public class ChallengeUserPK implements Serializable {
-    private int idChallenge;
-    private long idUser;
 
     @Column(name = "id_challenge")
-    @Id
+    private int idChallenge;
+
+    @Column(name = "id_user")
+    private long idUser;
+
+
     public int getIdChallenge() {
         return idChallenge;
     }
 
-    public void setIdChallenge(int idChallenge) {
-        this.idChallenge = idChallenge;
-    }
-
-    @Column(name = "id_user")
-    @Id
     public long getIdUser() {
         return idUser;
-    }
-
-    public void setIdUser(long idUser) {
-        this.idUser = idUser;
     }
 
     @Override

@@ -10,7 +10,7 @@ import ufjf.wati.dao.UserDAO;
 import ufjf.wati.dto.RankingResponse;
 import ufjf.wati.dto.TotalCigaretteResponse;
 import ufjf.wati.model.Cigarette;
-import ufjf.wati.model.CigarettesAverage;
+import ufjf.wati.dto.CigarettesAverageDto;
 import ufjf.wati.model.User;
 
 import javax.transaction.Transactional;
@@ -95,8 +95,8 @@ public class CigaretteFacadeREST {
         userDao.validateUserToken(token);
 
         User user = userDao.findByToken(token);
-        List<CigarettesAverage> userCigarettes = cigaretteDao.getOneMonthAgoSmoked(user.getId());
-        List<CigarettesAverage> averageCigarettes = cigaretteDao.getOneMonthAgoAverageSmoked();
+        List<CigarettesAverageDto> userCigarettes = cigaretteDao.getOneMonthAgoSmoked(user.getId());
+        List<CigarettesAverageDto> averageCigarettes = cigaretteDao.getOneMonthAgoAverageSmoked();
 
         return ResponseEntity.ok(new RankingResponse(userCigarettes, averageCigarettes));
 

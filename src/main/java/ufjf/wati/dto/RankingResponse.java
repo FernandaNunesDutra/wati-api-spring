@@ -1,26 +1,25 @@
 package ufjf.wati.dto;
 
-import ufjf.wati.model.CigarettesAverage;
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class RankingResponse {
     @SerializedName("user")
-    private List<CigarettesAverage> userAverage;
+    private List<CigarettesAverageDto> userAverage;
     
     @SerializedName("average")
-    private List<CigarettesAverage> average;
+    private List<CigarettesAverageDto> average;
 
-    public RankingResponse(List<CigarettesAverage> userAverage, List<CigarettesAverage> average) {
+    public RankingResponse(List<CigarettesAverageDto> userAverage, List<CigarettesAverageDto> average) {
         this.userAverage = userAverage;
         this.average = average;
     }
 
-    public List<CigarettesAverage> getUserAverage() {
+    public List<CigarettesAverageDto> getUserAverage() {
         return userAverage;
     }
 
-    public List<CigarettesAverage> getAverage() {
+    public List<CigarettesAverageDto> getAverage() {
         return average;
     }
 }

@@ -7,7 +7,7 @@ package ufjf.wati.dao;
 
 import org.springframework.stereotype.Repository;
 import ufjf.wati.model.Cigarette;
-import ufjf.wati.model.CigarettesAverage;
+import ufjf.wati.dto.CigarettesAverageDto;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -136,9 +136,9 @@ public class CigaretteDAO {
         return getSmokedBetweenDate(userId, oneMonthAgo(), new Date());
     }
 
-    public List<CigarettesAverage> getAverageSmoked(Date firstDate, Date secondDate) {
+    public List<CigarettesAverageDto> getAverageSmoked(Date firstDate, Date secondDate) {
 
-        List<CigarettesAverage> cigarettes = new ArrayList<>();
+        List<CigarettesAverageDto> cigarettes = new ArrayList<>();
 
         try {
 
@@ -155,7 +155,7 @@ public class CigaretteDAO {
                 int totalUser = Integer.parseInt(average[1].toString());
                 Date day = formatter.parse(average[2].toString());
 
-                cigarettes.add(new CigarettesAverage(totalCigarette, totalUser, day));
+                cigarettes.add(new CigarettesAverageDto(totalCigarette, totalUser, day));
             }
 
         } catch (Exception e) {
@@ -164,7 +164,7 @@ public class CigaretteDAO {
         return cigarettes;
     }
 
-    public List<CigarettesAverage> getOneMonthAgoAverageSmoked() {
+    public List<CigarettesAverageDto> getOneMonthAgoAverageSmoked() {
         return getAverageSmoked(oneMonthAgo(), new Date());
     }
 
@@ -177,15 +177,15 @@ public class CigaretteDAO {
         return oneMonthAgo;
     }
 
-    public List<CigarettesAverage> getOneMonthAgoSmoked(Long userId) {
-        List<CigarettesAverage> cigarettesAverage = new ArrayList<>();
+    public List<CigarettesAverageDto> getOneMonthAgoSmoked(Long userId) {
+        List<CigarettesAverageDto> cigarettesAverageDto = new ArrayList<>();
         List<Cigarette> cigarettes = getSmokedBetweenDate(userId, oneMonthAgo(), new Date());
 
         for (Cigarette cigarette : cigarettes) {
-            cigarettesAverage.add(new CigarettesAverage(cigarette.getNumCigarette(), 1, cigarette.getDateCreation()));
+            cigarettesAverageDto.add(new CigarettesAverageDto(cigarette.getNumCigarette(), 1, cigarette.getDateCreation()));
         }
 
-        return cigarettesAverage;
+        return cigarettesAverageDto;
     }
 
     public List<Cigarette> getSmokedBetweenDate(Long userId, Date firstDate, Date secondDate) {

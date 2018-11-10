@@ -1,12 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ufjf.wati.facade;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,13 +12,9 @@ import ufjf.wati.dto.TipsResponse;
 import ufjf.wati.model.Tip;
 
 import javax.ws.rs.QueryParam;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-/**
- * @author fernanda
- */
 @RestController
 @RequestMapping("/tip")
 public class TipFacadeREST {
@@ -39,11 +30,11 @@ public class TipFacadeREST {
     }
 
     @GetMapping("/all")
-    public ResponseEntity all(@RequestHeader("token") String token, @QueryParam("date") String date) {
+    public TipsResponse all(@RequestHeader("token") String token,
+                              @QueryParam("date") @DateTimeFormat(pattern="yyyyMMdd") Date creationDate) {
         userDao.validateUserToken(token);
 
         List<Tip> tips;
-        Date creationDate = parseDate(date);
 
         if (creationDate == null) {
             tips = tipDao.getAll();
@@ -51,23 +42,6 @@ public class TipFacadeREST {
             tips = tipDao.getByDate(creationDate);
         }
 
-        TipsResponse response = new TipsResponse(tips);
-        return ResponseEntity.ok(response);
-    }
-
-    private Date parseDate(String date) {
-        Date creationDate;
-
-        try {
-
-            creationDate = new SimpleDateFormat("yyyyMMdd").parse(date);
-
-        } catch (Exception e) {
-
-            creationDate = null;
-
-        }
-
-        return creationDate;
+        return new TipsResponse(tips);
     }
 }
