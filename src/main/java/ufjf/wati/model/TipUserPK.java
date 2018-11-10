@@ -1,32 +1,34 @@
 package ufjf.wati.model;
 
 import javax.persistence.Column;
-import javax.persistence.Id;
+import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 
+@Embeddable
 public class TipUserPK implements Serializable {
-    private int idTip;
-    private long idUser;
 
     @Column(name = "id_tip")
-    @Id
-    public int getIdTip() {
+    private long idTip;
+
+    @Column(name = "id_user")
+    private long idUser;
+
+    public TipUserPK() {
+
+    }
+
+    public TipUserPK(long idTip, long idUser) {
+        this.idTip = idTip;
+        this.idUser = idUser;
+    }
+
+    public long getIdTip() {
         return idTip;
     }
 
-    public void setIdTip(int idTip) {
-        this.idTip = idTip;
-    }
-
-    @Column(name = "id_user")
-    @Id
     public long getIdUser() {
         return idUser;
-    }
-
-    public void setIdUser(long idUser) {
-        this.idUser = idUser;
     }
 
     @Override

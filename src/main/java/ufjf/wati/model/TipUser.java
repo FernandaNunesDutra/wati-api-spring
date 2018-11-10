@@ -1,40 +1,37 @@
 package ufjf.wati.model;
 
 import javax.persistence.*;
-import java.sql.Date;
-import java.util.Objects;
+import java.util.Date;
 
 @Entity
-@Table(name = "tb_tip_user", schema = "wati", catalog = "")
-@IdClass(TipUserPK.class)
+@Table(name = "tb_tip_user", schema = "wati")
 public class TipUser {
-    private int idTip;
-    private long idUser;
-    private byte likeTip;
-    private Date date;
 
-    @Id
-    @Column(name = "id_tip")
-    public int getIdTip() {
-        return idTip;
-    }
-
-    public void setIdTip(int idTip) {
-        this.idTip = idTip;
-    }
-
-    @Id
-    @Column(name = "id_user")
-    public long getIdUser() {
-        return idUser;
-    }
-
-    public void setIdUser(long idUser) {
-        this.idUser = idUser;
-    }
+    @EmbeddedId
+    private TipUserPK pk;
 
     @Basic
     @Column(name = "like_tip")
+    private byte likeTip;
+
+    @Basic
+    @Column(name = "date")
+    private Date date;
+
+    public TipUser() {
+        
+    }
+
+    public TipUser(TipUserPK pk, byte likeTip, Date date) {
+        this.pk = pk;
+        this.likeTip = likeTip;
+        this.date = date;
+    }
+
+    public TipUserPK getPk() {
+        return pk;
+    }
+
     public byte getLikeTip() {
         return likeTip;
     }
@@ -43,29 +40,7 @@ public class TipUser {
         this.likeTip = likeTip;
     }
 
-    @Basic
-    @Column(name = "date")
     public Date getDate() {
         return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TipUser tipUser = (TipUser) o;
-        return idTip == tipUser.idTip &&
-                idUser == tipUser.idUser &&
-                likeTip == tipUser.likeTip &&
-                Objects.equals(date, tipUser.date);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(idTip, idUser, likeTip, date);
     }
 }
