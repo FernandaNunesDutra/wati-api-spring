@@ -5,6 +5,7 @@ import ufjf.wati.model.Challenge;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 import java.util.Date;
 import java.util.List;
@@ -24,7 +25,7 @@ public class ChallengeDAO {
         TypedQuery<Challenge> query = em.createQuery(
                 "SELECT c FROM Challenge c WHERE c.dateCreation >= :creationDate", Challenge.class);
         return query
-                .setParameter("creationDate", date)
+                .setParameter("creationDate", date, TemporalType.DATE)
                 .getResultList();
     }
 }

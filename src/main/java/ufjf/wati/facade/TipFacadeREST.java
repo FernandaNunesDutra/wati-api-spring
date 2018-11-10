@@ -2,16 +2,12 @@ package ufjf.wati.facade;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ufjf.wati.dao.TipDAO;
 import ufjf.wati.dao.UserDAO;
 import ufjf.wati.dto.TipsResponse;
 import ufjf.wati.model.Tip;
 
-import javax.ws.rs.QueryParam;
 import java.util.Date;
 import java.util.List;
 
@@ -31,7 +27,7 @@ public class TipFacadeREST {
 
     @GetMapping("/all")
     public TipsResponse all(@RequestHeader("token") String token,
-                              @QueryParam("date") @DateTimeFormat(pattern="yyyyMMdd") Date creationDate) {
+                              @RequestParam("date") @DateTimeFormat(pattern="yyyyMMdd") Date creationDate) {
         userDao.validateUserToken(token);
 
         List<Tip> tips;
