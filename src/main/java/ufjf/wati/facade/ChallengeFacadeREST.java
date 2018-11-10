@@ -1,7 +1,7 @@
 package ufjf.wati.facade;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,13 +12,9 @@ import ufjf.wati.dto.ChallengesResponse;
 import ufjf.wati.model.Challenge;
 
 import javax.ws.rs.QueryParam;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-/**
- * @author fernanda
- */
 @RestController
 @RequestMapping("/challenge")
 public class ChallengeFacadeREST {
@@ -33,17 +29,12 @@ public class ChallengeFacadeREST {
         this.challengeDao = challengeDao;
     }
 
-    @GetMapping("/koe")
-    public String koe() {
-        return "KOE";
-    }
-
     @GetMapping("/all")
-    public ResponseEntity all(@RequestHeader("token") String token, @QueryParam("date") String date) {
+    public ChallengesResponse all(@RequestHeader("token") String token,
+                            @QueryParam("date") @DateTimeFormat(pattern="yyyyMMdd") Date creationDate) {
         userDao.validateUserToken(token);
 
         List<Challenge> challenges;
-        Date creationDate = parseDate(date);
 
         if (creationDate == null) {
             challenges = challengeDao.getAll();
@@ -51,23 +42,6 @@ public class ChallengeFacadeREST {
             challenges = challengeDao.getByDate(creationDate);
         }
 
-        ChallengesResponse response = new ChallengesResponse(challenges);
-        return ResponseEntity.ok(response);
-    }
-
-    private Date parseDate(String date) {
-        Date creationDate;
-
-        try {
-
-            creationDate = new SimpleDateFormat("yyyyMMdd").parse(date);
-
-        } catch (Exception e) {
-
-            creationDate = null;
-
-        }
-
-        return creationDate;
+        return new ChallengesResponse(challenges);
     }
 }
