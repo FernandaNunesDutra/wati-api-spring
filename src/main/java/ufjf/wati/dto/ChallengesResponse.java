@@ -5,7 +5,7 @@
  */
 package ufjf.wati.dto;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import ufjf.wati.model.Challenge;
 
 import java.util.List;
@@ -15,7 +15,8 @@ import java.util.List;
  * @author fernanda
  */
 public class ChallengesResponse {
-    @SerializedName("challenges")
+
+    @JsonProperty("challenges")
     private List<Challenge> challenges;
 
     public ChallengesResponse(List<Challenge> challenges) {

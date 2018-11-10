@@ -5,6 +5,7 @@ import ufjf.wati.model.Tip;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 import java.util.Date;
 import java.util.List;
@@ -24,7 +25,7 @@ public class TipDAO {
         TypedQuery<Tip> query = em.createQuery(
                 "SELECT t FROM Tip t WHERE t.dateCreation >= :creationDate", Tip.class);
         return query
-                .setParameter("creationDate", date)
+                .setParameter("creationDate", date, TemporalType.DATE)
                 .getResultList();
     }
 }

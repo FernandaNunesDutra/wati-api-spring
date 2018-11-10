@@ -6,9 +6,9 @@ import java.util.Date;
 @Entity
 @Table(name = "tb_cigarette", schema = "wati")
 public class Cigarette {
-    @Id
-    @Column(name = "id")
-    private int id;
+
+    @EmbeddedId
+    private CigarettePK pk;
 
     @Column(name = "pack_cigarettes_price")
     private Double packCigarettesPrice;
@@ -22,28 +22,20 @@ public class Cigarette {
     @Column(name = "num_cigarette")
     private Integer numCigarette;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "date_creation")
-    private Date dateCreation;
-
-    @Column(name = "id_user")
-    private Long userId;
-
     public Cigarette() {
     }
 
     public Cigarette(Double packCigarettesPrice, Double economized, Double spent, Integer numCigarette,
                      Date dateCreation, Long userId) {
+        this.pk = new CigarettePK(dateCreation, userId);
         this.packCigarettesPrice = packCigarettesPrice;
         this.numCigarette = numCigarette;
-        this.dateCreation = dateCreation;
         this.economized = economized;
         this.spent = spent;
-        this.userId = userId;
     }
 
-    public int getId() {
-        return id;
+    public CigarettePK getPk() {
+        return pk;
     }
 
     public Double getPackCigarettesPrice() {
@@ -60,14 +52,6 @@ public class Cigarette {
 
     public Integer getNumCigarette() {
         return numCigarette;
-    }
-
-    public Date getDateCreation() {
-        return dateCreation;
-    }
-
-    public Long getUserId() {
-        return userId;
     }
 
     public String formatEconomized() {

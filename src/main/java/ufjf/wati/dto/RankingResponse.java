@@ -1,13 +1,14 @@
 package ufjf.wati.dto;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class RankingResponse {
-    @SerializedName("user")
+    @JsonProperty("user")
     private List<CigarettesAverageDto> userAverage;
     
-    @SerializedName("average")
+    @JsonProperty("average")
     private List<CigarettesAverageDto> average;
 
     public RankingResponse(List<CigarettesAverageDto> userAverage, List<CigarettesAverageDto> average) {

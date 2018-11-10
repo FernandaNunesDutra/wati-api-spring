@@ -1,18 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ufjf.wati.dto;
 
-/**
- *
- * @author fernanda
- */
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class TotalCigaretteResponse {
     private double economized;
     private double spent;
+
+    @JsonProperty("smoked_total")
     private long smokedTotal;
+
     private long average;
 
     public TotalCigaretteResponse(double economized, double spent, long smokedTotal, long average) {

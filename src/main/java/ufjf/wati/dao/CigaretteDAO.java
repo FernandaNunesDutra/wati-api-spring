@@ -1,28 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ufjf.wati.dao;
 
 import org.springframework.stereotype.Repository;
-import ufjf.wati.model.Cigarette;
 import ufjf.wati.dto.CigarettesAverageDto;
+import ufjf.wati.model.Cigarette;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import javax.persistence.*;
+import java.util.*;
 
-/**
- * @author fernanda
- */
 @Repository
 public class CigaretteDAO {
 
@@ -30,135 +14,63 @@ public class CigaretteDAO {
     private EntityManager em;
 
     public Cigarette getToday(Long userId) {
-        Date creationDate;
-
-        try {
-            Date today = new Date();
-            creationDate = new SimpleDateFormat("yyyyMMdd").parse(today.toString());
-
-        } catch (Exception e) {
-            return null;
-        }
-
-        return getByDate(creationDate, userId);
+        return getByDate(new Date(), userId);
     }
 
-    public Cigarette getByDate(Date date, Long userId) {
+    private Cigarette getByDate(Date date, Long userId) {
 
         try {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            String dateString = formatter.format(date);
-            String query = String.format("SELECT * FROM tb_cigarette WHERE id_user = %d AND date_creation='%s'", userId, dateString, Cigarette.class);
+            TypedQuery<Cigarette> query = em.createQuery(
+                    "SELECT c FROM Cigarette c WHERE c.pk.userId = :userId AND c.pk.dateCreation = :creationDate",
+                    Cigarette.class);
+            query.setParameter("userId", userId);
+            query.setParameter("creationDate", date, TemporalType.DATE);
 
-            Cigarette dateCigarette = (Cigarette) em.createNativeQuery(query, Cigarette.class).getSingleResult();
-
-            return dateCigarette;
+            return query.getSingleResult();
         } catch (NoResultException ex) {
             return null;
         }
-
     }
 
 
     public void alter(Cigarette cigarette) {
-
-        if (getByDate(cigarette.getDateCreation(), cigarette.getUserId()) == null) {
-            insert(cigarette);
-        } else {
-            update(cigarette);
-        }
+        em.merge(cigarette);
     }
 
-    public void insert(Cigarette cigarette) {
+    private double getFieldSum(String field, Long userId) {
+        String queryStr = String.format("SELECT SUM(c.%s) FROM Cigarette c WHERE c.pk.userId = :userId", field);
+        TypedQuery<Double> query = em.createQuery(queryStr, Double.class);
+        query.setParameter("userId", userId);
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        String date = formatter.format(cigarette.getDateCreation());
-
-        String query = String.format("INSERT INTO tb_cigarette (pack_cigarettes_price, num_cigarette, date_creation,id_user, economized, spent) "
-                        + "         VALUES(%s , %d, '%s', %d, %s , %s)",
-                cigarette.formatPricePack(),
-                cigarette.getNumCigarette(),
-                date,
-                cigarette.getUserId(),
-                cigarette.formatEconomized(),
-                cigarette.formatSpent());
-
-        em.createNativeQuery(query).executeUpdate();
-    }
-
-    public void update(Cigarette cigarette) {
-
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        String date = formatter.format(cigarette.getDateCreation());
-
-        String query = String.format("UPDATE tb_cigarette SET pack_cigarettes_price = %s, num_cigarette = %d, "
-                        + " economized = %s, spent = %s WHERE id_user = %d AND date_creation = '%s'",
-                cigarette.formatPricePack(),
-                cigarette.getNumCigarette(),
-                cigarette.formatEconomized(),
-                cigarette.formatSpent(),
-                cigarette.getUserId(),
-                date);
-
-        em.createNativeQuery(query).executeUpdate();
+        return query.getSingleResult();
     }
 
     public double getTotalSpent(Long userId) {
-
-        try {
-            String query = String.format("SELECT SUM(c.spent) FROM tb_cigarette c WHERE c.id_user = %d", userId);
-
-            double spent = (double) em.createNativeQuery(query)
-                    .getSingleResult();
-            return spent;
-        } catch (NullPointerException e) {
-            return 0.0;
-        }
-
+        return getFieldSum("spent", userId);
     }
 
     public double getTotalEconomized(Long userId) {
-
-        try {
-
-            String query = String.format("SELECT SUM(c.economized) FROM tb_cigarette c WHERE c.id_user = %d", userId);
-
-            double economized = (double) em.createNativeQuery(query)
-                    .getSingleResult();
-            return economized;
-        } catch (NullPointerException e) {
-            return 0.0;
-        }
+        return getFieldSum("economized", userId);
     }
 
-    public List<Cigarette> getAverageSmoked(Long userId) {
+    private List<CigarettesAverageDto> getAverageSmoked(Date before, Date after) {
+        TypedQuery<Object[]> query = em.createQuery(
+                "SELECT SUM(c.numCigarette), COUNT(c), c.pk.dateCreation" +
+                        " FROM Cigarette c WHERE c.pk.dateCreation BETWEEN :before AND :after GROUP BY c.pk.dateCreation",
+                Object[].class);
+        query.setParameter("before", before, TemporalType.DATE);
+        query.setParameter("after", after, TemporalType.DATE);
 
-        return getSmokedBetweenDate(userId, oneMonthAgo(), new Date());
-    }
-
-    public List<CigarettesAverageDto> getAverageSmoked(Date firstDate, Date secondDate) {
+        List<Object[]> averageByDay = query.getResultList();
 
         List<CigarettesAverageDto> cigarettes = new ArrayList<>();
 
-        try {
+        for (Object[] average : averageByDay) {
+            int totalCigarette = Integer.parseInt(average[0].toString());
+            int totalUser = Integer.parseInt(average[1].toString());
+            Date day = (Date) average[2];
 
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            String first = formatter.format(firstDate);
-            String second = formatter.format(secondDate);
-
-            String query = String.format("SELECT SUM(num_cigarette) AS total_cigarette , COUNT(id) AS total_user, date_creation FROM tb_cigarette c WHERE date_creation BETWEEN '%s' AND '%s' GROUP BY date_creation", first, second);
-
-            List<Object[]> averageByDay = em.createNativeQuery(query).getResultList();
-
-            for (Object[] average : averageByDay) {
-                int totalCigarette = Integer.parseInt(average[0].toString());
-                int totalUser = Integer.parseInt(average[1].toString());
-                Date day = formatter.parse(average[2].toString());
-
-                cigarettes.add(new CigarettesAverageDto(totalCigarette, totalUser, day));
-            }
-
-        } catch (Exception e) {
+            cigarettes.add(new CigarettesAverageDto(totalCigarette, totalUser, day));
         }
 
         return cigarettes;
@@ -172,9 +84,8 @@ public class CigaretteDAO {
         Locale myLocale = Locale.getDefault();
         Calendar today = Calendar.getInstance(myLocale);
         today.add(Calendar.MONTH, -1);
-        Date oneMonthAgo = today.getTime();
 
-        return oneMonthAgo;
+        return today.getTime();
     }
 
     public List<CigarettesAverageDto> getOneMonthAgoSmoked(Long userId) {
@@ -182,63 +93,41 @@ public class CigaretteDAO {
         List<Cigarette> cigarettes = getSmokedBetweenDate(userId, oneMonthAgo(), new Date());
 
         for (Cigarette cigarette : cigarettes) {
-            cigarettesAverageDto.add(new CigarettesAverageDto(cigarette.getNumCigarette(), 1, cigarette.getDateCreation()));
+            cigarettesAverageDto.add(new CigarettesAverageDto(cigarette.getNumCigarette(), 1,
+                            cigarette.getPk().getDateCreation()));
         }
 
         return cigarettesAverageDto;
     }
 
-    public List<Cigarette> getSmokedBetweenDate(Long userId, Date firstDate, Date secondDate) {
-        List<Cigarette> cigarettes = new ArrayList<>();
+    private List<Cigarette> getSmokedBetweenDate(Long userId, Date before, Date after) {
+        TypedQuery<Cigarette> query = em.createQuery(
+                "SELECT c FROM Cigarette c WHERE c.pk.userId = :userId AND c.pk.dateCreation BETWEEN :before AND :after",
+                Cigarette.class);
+        query.setParameter("userId", userId);
+        query.setParameter("before", before, TemporalType.DATE);
+        query.setParameter("after", after, TemporalType.DATE);
 
-        try {
-
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            String first = formatter.format(firstDate);
-            String second = formatter.format(secondDate);
-
-            String query = String.format("SELECT * FROM tb_cigarette c WHERE c.id_user = %d AND date_creation BETWEEN '%s' AND '%s'", userId, first, second);
-
-            cigarettes = em.createNativeQuery(query, Cigarette.class).getResultList();
-
-        } catch (Exception e) {
-
-        }
-
-        return cigarettes;
+        return query.getResultList();
     }
 
     public long getSmokedTotal(Long userId) {
+        TypedQuery<Long> query = em.createQuery(
+                "SELECT SUM(c.numCigarette) FROM Cigarette c WHERE c.pk.userId = :userId", Long.class);
+        query.setParameter("userId", userId);
 
-        try {
-
-            String query = String.format("SELECT SUM(c.num_cigarette) FROM tb_cigarette c WHERE c.id_user = %d", userId);
-
-            Object smoked = em.createNativeQuery(query).getSingleResult();
-            return Long.parseLong(smoked.toString());
-        } catch (NullPointerException e) {
-            return 0;
-        }
+        return query.getSingleResult();
     }
 
     public long getAverage(Long userId) {
+        long cigarette = getSmokedTotal(userId);
 
-        try {
+        TypedQuery<Long> query = em.createQuery(
+                "SELECT COUNT(c) FROM Cigarette c WHERE c.pk.userId = :userId", Long.class);
+        query.setParameter("userId", userId);
 
-            long cigarette = getSmokedTotal(userId);
-            Query query = em.createQuery("SELECT COUNT(c.id) FROM Cigarette c WHERE c.userId = :userId");
-            query.setParameter("userId", userId);
-            long day = (long) query.getSingleResult();
+        long day = query.getSingleResult();
 
-            if (day > 0) {
-                long average = (cigarette / day);
-                return average;
-            }
-
-        } catch (NullPointerException e) {
-            return 0;
-        }
-
-        return 0;
+        return day > 0 ? cigarette / day : 0;
     }
 }

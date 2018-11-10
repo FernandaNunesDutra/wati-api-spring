@@ -5,8 +5,9 @@
  */
 package ufjf.wati.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import ufjf.wati.model.Tip;
-import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -14,7 +15,8 @@ import java.util.List;
  * @author fernanda
  */
 public class TipsResponse {
-    @SerializedName("tips")
+
+    @JsonProperty("tips")
     private List<Tip> tips;
 
     public TipsResponse(List<Tip> tips) {
