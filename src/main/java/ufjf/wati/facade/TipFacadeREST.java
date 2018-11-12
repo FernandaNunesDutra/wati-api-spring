@@ -7,6 +7,7 @@ import ufjf.wati.dao.TipDAO;
 import ufjf.wati.dao.UserDAO;
 import ufjf.wati.dto.TipsResponse;
 import ufjf.wati.model.Tip;
+import ufjf.wati.model.User;
 
 import java.util.Date;
 import java.util.List;
@@ -28,14 +29,14 @@ public class TipFacadeREST {
     @GetMapping("/all")
     public TipsResponse all(@RequestHeader("token") String token,
                               @RequestParam("date") @DateTimeFormat(pattern="yyyyMMdd") Date creationDate) {
-        userDao.validateUserToken(token);
+        User user = userDao.findByToken(token);
 
         List<Tip> tips;
 
         if (creationDate == null) {
             tips = tipDao.getAll();
         } else {
-            tips = tipDao.getByDate(creationDate);
+            tips = tipDao.getByDateRecommender(creationDate, user.getId());
         }
 
         return new TipsResponse(tips);
