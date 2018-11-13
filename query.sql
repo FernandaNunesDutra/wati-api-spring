@@ -71,6 +71,8 @@ ALTER TABLE tb_tip_user ADD CONSTRAINT pk_tip_user PRIMARY KEY CLUSTERED (id_tip
 CREATE TABLE `tb_tip_user_recommendation` (
   `id_tip` int(11) NOT NULL,
   `id_user` bigint(20) NOT NULL,
+  `algorithm` varchar(100) NOT NULL,
+  `metric` varchar(100) NOT NULL,
   `date` DATE DEFAULT NULL
 );
 

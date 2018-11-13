@@ -6,7 +6,7 @@
 	<groupId>ufjf</groupId>
 	<artifactId>wati</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<name>wati</name>
 	<description>Demo project for Spring Boot</description>
