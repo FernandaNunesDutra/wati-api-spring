@@ -5,10 +5,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import ufjf.wati.dao.TipDAO;
 import ufjf.wati.dao.UserDAO;
+import ufjf.wati.dto.RecommendedTipsDto;
 import ufjf.wati.dto.TipsResponse;
 import ufjf.wati.model.Tip;
 import ufjf.wati.model.User;
+import ufjf.wati.recommender.RecommenderApi;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,13 +34,14 @@ public class TipFacadeREST {
                               @RequestParam("date") @DateTimeFormat(pattern="yyyyMMdd") Date creationDate) {
         User user = userDao.findByToken(token);
 
-        List<Tip> tips;
+        RecommendedTipsDto ids =  RecommenderApi.GetTipsFromRecommender(109);
+        List<Tip> tips = new ArrayList<>();
 
-        if (creationDate == null) {
+        /*if (creationDate == null) {
             tips = tipDao.getAll();
         } else {
             tips = tipDao.getByDateRecommender(creationDate, user.getId());
-        }
+        }*/
 
         return new TipsResponse(tips);
     }
