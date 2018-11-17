@@ -34,14 +34,13 @@ public class TipFacadeREST {
                               @RequestParam("date") @DateTimeFormat(pattern="yyyyMMdd") Date creationDate) {
         User user = userDao.findByToken(token);
 
-        RecommendedTipsDto ids =  RecommenderApi.GetTipsFromRecommender(109);
+        RecommendedTipsDto tipIds =  RecommenderApi.GetTipsFromRecommender((int)user.getId());
         List<Tip> tips = new ArrayList<>();
 
-        /*if (creationDate == null) {
-            tips = tipDao.getAll();
-        } else {
-            tips = tipDao.getByDateRecommender(creationDate, user.getId());
-        }*/
+        for (int id : tipIds.getTips()) {
+            Tip tip = tipDao.getById(id);
+            tips.add(tip);
+        }
 
         return new TipsResponse(tips);
     }

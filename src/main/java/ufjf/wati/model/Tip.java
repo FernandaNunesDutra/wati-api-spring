@@ -9,7 +9,7 @@ public class Tip {
 
     @Id
     @Column(name = "id")
-    private int id;
+    private long id;
 
     @Column(name = "description")
     private String description;
@@ -24,7 +24,7 @@ public class Tip {
     @Column(name = "date_creation")
     private Date dateCreation;
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
