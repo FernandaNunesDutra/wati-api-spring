@@ -12,12 +12,12 @@ public class UserDAO {
     @PersistenceContext
     private EntityManager em;
 
-    public User login(String email, String password) {
+    public User login(String email, byte[] password) {
 
         TypedQuery<User> query = em.createQuery(
                 "Select u FROM User u WHERE u.email = :email and u.password = :password", User.class);
         query.setParameter("email", email);
-        query.setParameter("password", password.getBytes());
+        query.setParameter("password", password);
 
         try {
             return query.getSingleResult();

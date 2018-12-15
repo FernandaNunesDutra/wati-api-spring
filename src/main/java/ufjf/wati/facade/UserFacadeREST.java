@@ -7,9 +7,15 @@ import ufjf.wati.dto.LoginDto;
 import ufjf.wati.dto.UserDto;
 import ufjf.wati.model.User;
 import ufjf.wati.service.Authentication;
+import ufjf.wati.service.Encrypter;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.transaction.Transactional;
 import javax.ws.rs.core.MediaType;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 @RestController
 @RequestMapping(value = "/user", consumes = {MediaType.APPLICATION_JSON})
@@ -25,7 +31,9 @@ public class UserFacadeREST {
     @PostMapping("/login")
     @Transactional
     public UserDto login(@RequestBody LoginDto loginDto) {
-        User user = userDao.login(loginDto.getEmail(), loginDto.getPassword());
+
+
+        User user = userDao.login(loginDto.getEmail(), Encrypter.encrypt(loginDto.getPassword()));
 
         String token = Authentication.generateToken(user.getId());
         UserDto response = new UserDto(user.getId(), user.getEmail(), user.getName(), token);

@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 public class RecommenderApi {
 
-    private static String BASE_URL = "http://localhost:5002";
+    private static String BASE_URL = "http://localhost:8590/recommender-system";
     private static String URL_GET_TIPS = BASE_URL + "/tips/";
 
     public static RecommendedTipsDto GetTipsFromRecommender(int userId){
